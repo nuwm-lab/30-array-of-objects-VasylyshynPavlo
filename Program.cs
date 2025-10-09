@@ -8,7 +8,7 @@ namespace LabWork
     // Відео-інструкції щодо роботи з github можна переглянути 
     // за посиланням https://www.youtube.com/@ViktorZhukovskyy/videos 
 
-    // Class formula for sin(ax + b)
+    // Class formula for sin(ax + b) 
     class Formula
     {
         private double a;
