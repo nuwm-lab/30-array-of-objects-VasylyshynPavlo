@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace LabWork
 {
@@ -11,102 +12,109 @@ namespace LabWork
     // Class formula for sin(ax + b)
     class Formula
     {
-        private double a;
-        private double bRadians;
-        private double xRadians;
+        private double _A;
+        private double _a;
+        private double _b;
 
-        public Formula(double a, double bRadians, double xRadians)
+        public Formula(double A, double a, double b)
         {
-            this.a = a;
-            this.bRadians = bRadians;
-            this.xRadians = xRadians;
+            _A = A;
+            _a = a;
+            _b = b;
         }
 
-        // Setters
-        public void SetA(double a)
+        public double A
         {
-            this.a = a;
+            get => _A;
+            set => _A = value;
         }
 
-        public void SetB(double bRadians)
+        public double a
         {
-            this.bRadians = bRadians;
-        }
-        public void SetX(double xRadians)
-        {
-            this.xRadians = xRadians;
+            get => _a;
+            set => _a = value;
         }
 
-        // Getters
-        public double GetA()
+        public double b
         {
-            return a;
+            get => _b;
+            set => _b = value;
         }
 
-        public double GetB()
+        public double Calculate(double x)
         {
-            return bRadians;
-        }
-
-        public double GetX()
-        {
-            return xRadians;
-        }
-
-        public double Calculate()
-        {
-            return Math.Sin(a * xRadians + bRadians);
+            return _A * Math.Sin(_a * x + _b);
         }
 
         public double GetAmplitude()
         {
-            return Math.Sqrt(a * a + bRadians * bRadians);
+            return Math.Abs(_A);
         }
+
+        public override string ToString()
+        {
+            return $"y = {A} * sin({a}x + {b})";
+        }
+
     }
 
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            Console.WriteLine("Enter the number of formulas ");
-            string input = Console.ReadLine();
-            if (int.TryParse(input, out int n))
+            Console.Write("Enter the number of formulas: ");
+            if (!int.TryParse(Console.ReadLine(), out int n) || n <= 0)
             {
-                if (n <= 0)
-                {
-                    Console.WriteLine("The number of formulas must be a positive integer.");
-                    return;
-                }
-                Formula[] formulas = new Formula[n];
-                for (int i = 0; i < n; i++)
-                {
-                    Console.WriteLine("Enter a, b (in radians), x (in radians) separated by spaces:");
-                    string line = Console.ReadLine();
-                    string[] parts = line.Split(' ');
-                    if (parts.Length != 3 ||
-                        !double.TryParse(parts[0], out double a) ||
-                        !double.TryParse(parts[1], out double b) ||
-                        !double.TryParse(parts[2], out double x))
-                    {
-                        Console.WriteLine("Invalid input. Please enter three numeric values.");
-                        return;
-                    }
-                    formulas[i] = new Formula(a, b, x);
-                }
-                Console.WriteLine("Amplitudes:");
-                foreach (var formula in formulas)
-                {
-                    Console.WriteLine(formula.GetAmplitude());
-                }
-                double maxAmplitude = formulas[0].GetAmplitude();
-                for (int i = 1; i < formulas.Length; i++)
-                {
-                    double amplitude = formulas[i].GetAmplitude();
-                    if (amplitude > maxAmplitude)
-                        maxAmplitude = amplitude;
-                }
-                Console.WriteLine("Maximum amplitude: " + maxAmplitude);
+                Console.WriteLine("Invalid number.");
+                return;
             }
+
+            Formula[] formulas = new Formula[n];
+            for (int i = 0; i < n; i++)
+            {
+                Console.WriteLine($"Enter A, a, b (in radians) for formula #{i + 1}:");
+                string[] parts = Console.ReadLine()
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                if (parts.Length != 3 ||
+                    !double.TryParse(parts[0], NumberStyles.Any, CultureInfo.InvariantCulture, out double A) ||
+                    !double.TryParse(parts[1], NumberStyles.Any, CultureInfo.InvariantCulture, out double a) ||
+                    !double.TryParse(parts[2], NumberStyles.Any, CultureInfo.InvariantCulture, out double b))
+                {
+                    Console.WriteLine("Invalid input. Try again.");
+                    i--;
+                    continue;
+                }
+
+                formulas[i] = new Formula(A, a, b);
+            }
+
+            Console.Write("Enter x (in radians): ");
+            if (!double.TryParse(Console.ReadLine(), NumberStyles.Any, CultureInfo.InvariantCulture, out double x))
+            {
+                Console.WriteLine("Invalid x.");
+                return;
+            }
+
+            const double epsilon = 1e-9;
+            Formula bestFormula = formulas[0];
+            double bestValue = bestFormula.Calculate(x);
+
+            foreach (var formula in formulas)
+            {
+                double value = formula.Calculate(x);
+                if (value > bestValue + epsilon ||
+                    Math.Abs(value - bestValue) <= epsilon && formula.GetAmplitude() > bestFormula.GetAmplitude())
+                {
+                    bestValue = value;
+                    bestFormula = formula;
+                }
+            }
+
+            Console.WriteLine("\nFormula with maximum value at given x:");
+            Console.WriteLine(bestFormula);
+            Console.WriteLine($"Value at x = {x}: {bestValue}");
+            Console.WriteLine($"Amplitude: {bestFormula.GetAmplitude()}");
         }
     }
 }
