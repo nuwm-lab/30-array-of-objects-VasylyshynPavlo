@@ -8,17 +8,68 @@ namespace LabWork
     // Відео-інструкції щодо роботи з github можна переглянути 
     // за посиланням https://www.youtube.com/@ViktorZhukovskyy/videos 
 
-    class Result
-    { 
-    // TODO: do it !
+    class Formula
+    {
+        private double a;
+        private double bRadians;
+        private double xRadians;
+
+        public Formula(double a, double bRadians, double xRadians)
+        {
+            this.a = a;
+            this.bRadians = bRadians;
+            this.xRadians = xRadians;
+        }
+
+        public double GetAmplitude()
+        {
+            return Math.Sqrt(a * a + bRadians * bRadians);
+        }
     }
-    
+
     class Program
     {
         static void Main(string[] args)
         {
-            
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Enter the number of formulas ");
+            string input = Console.ReadLine();
+            if (int.TryParse(input, out int n))
+            {
+                if (n <= 0)
+                {
+                    Console.WriteLine("The number of formulas must be a positive integer.");
+                    return;
+                }
+                Formula[] formulas = new Formula[n];
+                for (int i = 0; i < n; i++)
+                {
+                    Console.WriteLine("Enter a, b (in radians), x (in radians) separated by spaces:");
+                    string line = Console.ReadLine();
+                    string[] parts = line.Split(' ');
+                    if (parts.Length != 3 ||
+                        !double.TryParse(parts[0], out double a) ||
+                        !double.TryParse(parts[1], out double b) ||
+                        !double.TryParse(parts[2], out double x))
+                    {
+                        Console.WriteLine("Invalid input. Please enter three numeric values.");
+                        return;
+                    }
+                    formulas[i] = new Formula(a, b, x);
+                }
+                Console.WriteLine("Amplitudes:");
+                foreach (var formula in formulas)
+                {
+                    Console.WriteLine(formula.GetAmplitude());
+                }
+                double maxAmplitude = formulas[0].GetAmplitude();
+                for (int i = 1; i < formulas.Length; i++)
+                {
+                    double amplitude = formulas[i].GetAmplitude();
+                    if (amplitude > maxAmplitude)
+                        maxAmplitude = amplitude;
+                }
+                Console.WriteLine("Maximum amplitude: " + maxAmplitude);
+            }
         }
     }
 }
